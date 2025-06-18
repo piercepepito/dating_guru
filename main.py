@@ -10,6 +10,10 @@ import yaml
 import os
 
 from utils import tools
+from configparser import ConfigParser
+
+config = ConfigParser()
+config.read('config.ini')
 
 #load environment variables
 load_dotenv()
@@ -42,7 +46,7 @@ with open('utils/prompts.yaml', 'r') as file:
 llm = ChatOpenAI(temperature = 0.7)
 
 #create a chatbot
-history = tools.redis_session("redis://localhost:6379")
+history = tools.redis_session(config['Redis']['redis_url'])
 memory = tools.create_chatbot_memory(history)
 
 dating_prompt = PromptTemplate.from_template(prompts['chatbot']['human'])
