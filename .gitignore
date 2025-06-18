@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#ignore files in files folder
+files/*.pdf
+files/*.txt
+files/*.docx
+
 # C extensions
 *.so
 
