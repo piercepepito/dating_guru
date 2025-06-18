@@ -12,7 +12,6 @@ With Tinder, Bumble and Hinge, making dating more accessible, there is now a nee
 - **OpenAI GPT** – Natural language generation (LLM)
 - **FAISS** – Vector search and retrieval (RAG)
 - **Python** – Backend logic
-- **Docker** – Containerization for deployment
 
 
 ## Getting Started:
@@ -28,8 +27,7 @@ With Tinder, Bumble and Hinge, making dating more accessible, there is now a nee
     2. Change the filename to config.ini
 4. Run redis in your terminal
     1. In your terminal type in: `redis-cli`
-5. Create DockerImage
-6. Run Docker Image
+5. In your terminal, run `python main.py`
 
 
 ## Future Improvements
