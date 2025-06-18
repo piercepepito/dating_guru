@@ -187,7 +187,7 @@ def chat_with_memory(chatbot, history):
             input_text = input('You: ')
             if input_text.lower() == 'exit' or input_text.lower() == 'quit': break
             response = chatbot.invoke({'question': input_text})
-            print(f'Dating Guru: {response['answer']}')
+            print(f"Dating Guru: {response['answer']}")
     except KeyboardInterrupt: 
         print('Goodbye!')
     finally:
