@@ -3,10 +3,8 @@ import os
 import json
 import hashlib
 
-#Load and Split the documents
 from langchain_community.document_loaders import TextLoader, UnstructuredWordDocumentLoader, PyPDFLoader, UnstructuredPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
@@ -15,27 +13,22 @@ import uuid
 from langchain.memory import ConversationBufferMemory
 from langchain_redis import RedisChatMessageHistory
 
-
-TRACKING_FILE = "processed_files.json"
-DATA_DIR = "files"
-VECTORSTORE_DIR = "faiss_index"
-
 #track processed files
-def get_file_hash(filepath):
+def _get_file_hash(filepath):
     with open(filepath, 'rb') as f:
         return hashlib.sha256(f.read()).hexdigest()
 
-def load_processed_files():
+def _load_processed_files(TRACKING_FILE):
     if os.path.exists(TRACKING_FILE):
         with open(TRACKING_FILE, 'r') as f:
             return json.load(f)
-    return {}
+    else : return {}
 
-def save_processed_files(processed):
+def _save_processed_files(processed):
     with open(TRACKING_FILE, 'w') as f:
         json.dump(processed, f, indent=2)
 
-def get_new_or_modified_files(directory, processed_files):
+def _get_new_or_modified_files(directory, processed_files):
     allowed_extensions = {'.pdf', '.docx', '.txt'}
     new_or_modified = []
 
@@ -46,7 +39,7 @@ def get_new_or_modified_files(directory, processed_files):
                 continue  # Skip unsupported file types
 
             path = os.path.join(root, name)
-            file_hash = get_file_hash(path)
+            file_hash = _get_file_hash(path)
 
             if path not in processed_files or processed_files[path] != file_hash:
                 new_or_modified.append((path, file_hash))
@@ -54,7 +47,7 @@ def get_new_or_modified_files(directory, processed_files):
     return new_or_modified
 
 
-def get_file_loader(filename):
+def _get_file_loader(filename):
     ext = filename.split(".")[-1]
     if ext == 'pdf':
         return UnstructuredPDFLoader(filename).load()
@@ -64,14 +57,14 @@ def get_file_loader(filename):
         return UnstructuredWordDocumentLoader(filename).load()
     else: return None
 
-def your_splitter(docs):
+def _your_splitter(docs):
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     return splitter.split_documents(docs)
 
 # Main sync function
-def sync_new_files_to_faiss(data_dir):
-    processed_files = load_processed_files()
-    new_files = get_new_or_modified_files(data_dir, processed_files)
+def sync_new_files_to_faiss(data_dir, TRACKING_FILE, VECTORSTORE_DIR):
+    processed_files = _load_processed_files(TRACKING_FILE)
+    new_files = _get_new_or_modified_files(data_dir, processed_files)
 
     if not new_files:
         print("No new or modified files found.")
@@ -89,8 +82,8 @@ def sync_new_files_to_faiss(data_dir):
 
     for path, file_hash in new_files:
         try:
-            docs = get_file_loader(path)
-            split_docs = your_splitter(docs)
+            docs = _get_file_loader(path)
+            split_docs = _your_splitter(docs)
 
             if vectorstore is None:
                 # First time creation with initial docs
@@ -105,12 +98,10 @@ def sync_new_files_to_faiss(data_dir):
             print(f"Error processing {path}: {e}")
 
     # Save updated state
-    save_processed_files(processed_files)
+    _save_processed_files(processed_files)
 
     # Persist FAISS
     vectorstore.save_local(VECTORSTORE_DIR)
-
-
 
 def redis_session(redis_url_use):
     session_id = str(uuid.uuid4())
