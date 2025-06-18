@@ -36,7 +36,7 @@ def _load_processed_files(TRACKING_FILE):
             return json.load(f)
     else : return {}
 
-def _save_processed_files(processed):
+def _save_processed_files(processed, TRACKING_FILE):
     '''
     Saves the processed embedding files
 
@@ -139,7 +139,7 @@ def sync_new_files_to_faiss(data_dir, TRACKING_FILE, VECTORSTORE_DIR):
             print(f"Error processing {path}: {e}")
 
     # Save updated state
-    _save_processed_files(processed_files)
+    _save_processed_files(processed_files, TRACKING_FILE)
 
     # Persist FAISS
     vectorstore.save_local(VECTORSTORE_DIR)
